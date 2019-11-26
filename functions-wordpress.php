@@ -1,4 +1,49 @@
 <?php
+
+/**
+ * @return Menu array by name
+ */
+function base_wpGetMenuArray($current_menu) {
+    $array_menu = wp_get_nav_menu_items($current_menu);
+    $menu = array();
+    foreach ($array_menu as $m) {
+        //var_dump($m);
+        if (empty($m->menu_item_parent)) {
+            $menu[$m->ID] = array();
+            $menu[$m->ID]['ID'] = $m->ID;
+            $menu[$m->ID]['object_id'] = $m->object_id;
+            $menu[$m->ID]['title'] = $m->title;
+            $menu[$m->ID]['url'] = $m->url;
+            $menu[$m->ID]['children'] = array();
+        }
+    }
+    $submenu = array();
+    foreach ($array_menu as $m) {
+        if ($m->menu_item_parent) {
+            $submenu[$m->ID] = array();
+            $submenu[$m->ID]['ID'] = $m->ID;
+            $submenu[$m->ID]['object_id'] = $m->object_id;
+            $submenu[$m->ID]['title'] = $m->title;
+            $submenu[$m->ID]['url'] = $m->url;
+            $menu[$m->menu_item_parent]['children'][$m->ID] = $submenu[$m->ID];
+        }
+    }
+    return $menu;
+}
+
+/**
+ * Register Menu in WP
+ */
+function base_registerMenus() {
+    register_nav_menus(
+        array(
+            'header-menu' => __( 'Header Menu' ),
+        )
+    );
+}
+add_action( 'init', 'base_registerMenus' );
+
+
 /**
  * @return [insert style.css in header]
  */
